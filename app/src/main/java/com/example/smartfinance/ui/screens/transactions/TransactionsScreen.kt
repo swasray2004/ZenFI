@@ -23,6 +23,8 @@ import java.util.*
 @Composable
 fun TransactionsScreen(navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
+    var transactions by remember { mutableStateOf(listOf<Transaction>()) }
+    var showDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -41,9 +43,9 @@ fun TransactionsScreen(navController: NavController) {
         bottomBar = { BottomNavBar(navController = navController) },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* Add transaction */ }
+                onClick = { showDialog = true }
             ) {
-                Icon(Icons.Default.Add, "Add Transaction")
+                Icon(Icons.Default.Add, contentDescription = "Add Transaction")
             }
         }
     ) { paddingValues ->
@@ -52,75 +54,96 @@ fun TransactionsScreen(navController: NavController) {
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            // Sample transactions for demonstration
-            val sampleTransactions = listOf(
-                Transaction(
-                    id = 1,
-                    title = "Grocery Store",
-                    amount = 78.35,
-                    type = TransactionType.EXPENSE,
-                    category = "Groceries",
-                    date = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }.time
-                ),
-                Transaction(
-                    id = 2,
-                    title = "Salary Deposit",
-                    amount = 2450.00,
-                    type = TransactionType.INCOME,
-                    category = "Salary",
-                    date = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -3) }.time
-                ),
-                Transaction(
-                    id = 3,
-                    title = "Coffee Shop",
-                    amount = 4.75,
-                    type = TransactionType.EXPENSE,
-                    category = "Dining",
-                    date = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -3) }.time
-                ),
-                Transaction(
-                    id = 4,
-                    title = "Gas Station",
-                    amount = 45.50,
-                    type = TransactionType.EXPENSE,
-                    category = "Transportation",
-                    date = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -5) }.time
-                ),
-                Transaction(
-                    id = 5,
-                    title = "Internet Bill",
-                    amount = 59.99,
-                    type = TransactionType.EXPENSE,
-                    category = "Utilities",
-                    date = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -7) }.time
-                ),
-                Transaction(
-                    id = 6,
-                    title = "Freelance Payment",
-                    amount = 350.00,
-                    type = TransactionType.INCOME,
-                    category = "Freelance",
-                    date = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -10) }.time
-                ),
-                Transaction(
-                    id = 7,
-                    title = "Movie Tickets",
-                    amount = 24.50,
-                    type = TransactionType.EXPENSE,
-                    category = "Entertainment",
-                    date = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -12) }.time
-                )
-            )
-
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp)
             ) {
-                items(sampleTransactions) { transaction ->
+                items(transactions) { transaction ->
                     TransactionItem(transaction = transaction)
                 }
             }
         }
     }
+
+    if (showDialog) {
+        AddTransactionDialog(
+            onDismiss = { showDialog = false },
+            onAddTransaction = { newTransaction ->
+                transactions = transactions + newTransaction
+            }
+        )
+    }
+}
+
+@Composable
+fun AddTransactionDialog(onDismiss: () -> Unit, onAddTransaction: (Transaction) -> Unit) {
+    var title by remember { mutableStateOf("") }
+    var amount by remember { mutableStateOf("") }
+    var category by remember { mutableStateOf("") }
+    var type by remember { mutableStateOf(TransactionType.EXPENSE) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add Transaction") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("Title") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = amount,
+                    onValueChange = { amount = it },
+                    label = { Text("Amount") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = category,
+                    onValueChange = { category = it },
+                    label = { Text("Category") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    Text("Type: ")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(onClick = { type = TransactionType.INCOME }) {
+                        Text("Income")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(onClick = { type = TransactionType.EXPENSE }) {
+                        Text("Expense")
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val transaction = Transaction(
+                        id = System.currentTimeMillis(),
+                        title = title,
+                        amount = amount.toDoubleOrNull() ?: 0.0,
+                        category = category,
+                        type = type,
+                        date = Date()
+                    )
+                    onAddTransaction(transaction)
+                    onDismiss()
+                }
+            ) {
+                Text("Add")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
