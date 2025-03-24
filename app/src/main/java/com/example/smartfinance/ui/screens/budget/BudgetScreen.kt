@@ -17,6 +17,11 @@ import com.example.smartfinance.ui.components.BottomNavBar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BudgetScreen(navController: NavController) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    // Mutable list of budget categories
+    var budgetCategories by remember { mutableStateOf(listOf<BudgetCategory>()) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -26,7 +31,7 @@ fun BudgetScreen(navController: NavController) {
         bottomBar = { BottomNavBar(navController = navController) },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* Add budget category */ }
+                onClick = { showDialog = true } // Show the input dialog
             ) {
                 Icon(Icons.Default.Add, "Add Budget Category")
             }
@@ -55,8 +60,12 @@ fun BudgetScreen(navController: NavController) {
 
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    val totalSpent = budgetCategories.sumOf { it.spent }
+                    val totalBudget = budgetCategories.sumOf { it.limit }
+                    val progress = if (totalBudget > 0) (totalSpent / totalBudget).coerceIn(0.0, 1.0).toFloat() else 0f
+
                     LinearProgressIndicator(
-                        progress = 0.65f,
+                        progress = { progress },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(8.dp)
@@ -69,18 +78,18 @@ fun BudgetScreen(navController: NavController) {
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "Spent: $1,954.25",
+                            text = "Spent: Rs.${String.format("%.2f", totalSpent)}",
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Text(
-                            text = "Remaining: $1,045.75",
+                            text = "Remaining: Rs.${String.format("%.2f", totalBudget - totalSpent)}",
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold
                         )
                     }
 
                     Text(
-                        text = "Total: $3,000.00",
+                        text = "Total: Rs.${String.format("%.2f", totalBudget)}",
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.align(Alignment.End)
                     )
@@ -94,23 +103,23 @@ fun BudgetScreen(navController: NavController) {
                 modifier = Modifier.padding(vertical = 8.dp)
             )
 
-            // Sample budget categories
-            val budgetCategories = listOf(
-                BudgetCategory("Groceries", 500.00, 325.75),
-                BudgetCategory("Dining", 300.00, 245.50),
-                BudgetCategory("Transportation", 200.00, 145.50),
-                BudgetCategory("Entertainment", 150.00, 95.25),
-                BudgetCategory("Utilities", 350.00, 310.00),
-                BudgetCategory("Shopping", 200.00, 185.75),
-                BudgetCategory("Health", 100.00, 45.00)
-            )
-
             LazyColumn {
                 items(budgetCategories) { category ->
                     BudgetCategoryItem(category)
                 }
             }
         }
+    }
+
+    // Show the input dialog
+    if (showDialog) {
+        AddBudgetCategoryDialog(
+            onDismiss = { showDialog = false },
+            onSave = { newCategory ->
+                budgetCategories = budgetCategories + newCategory
+                showDialog = false
+            }
+        )
     }
 }
 
@@ -144,28 +153,93 @@ fun BudgetCategoryItem(category: BudgetCategory) {
                 )
 
                 Text(
-                    text = "$${String.format("%.2f", category.spent)} / $${String.format("%.2f", category.limit)}",
+                    text = "Rs.${String.format("%.2f", category.spent)} / Rs.${String.format("%.2f", category.limit)}",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            val progressColor = when {
+                progress < 0.5f -> MaterialTheme.colorScheme.primary // Green for safe spending
+                progress < 0.8f -> MaterialTheme.colorScheme.tertiary // Yellow for caution
+                else -> MaterialTheme.colorScheme.error // Red for over-budget
+            }
+
             LinearProgressIndicator(
-                progress = progress,
+                progress = { progress }, // Use lambda instead of direct Float value
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp),
-                color = if (isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                color = progressColor,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant
             )
+
+
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Remaining: $${String.format("%.2f", category.limit - category.spent)}",
+                text = "Remaining: Rs.${String.format("%.2f", category.limit - category.spent)}",
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.align(Alignment.End)
             )
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddBudgetCategoryDialog(onDismiss: () -> Unit, onSave: (BudgetCategory) -> Unit) {
+    var name by remember { mutableStateOf("") }
+    var limit by remember { mutableStateOf("") }
+    var spent by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add Budget Category") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Category Name") }
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = limit,
+                    onValueChange = { limit = it },
+                    label = { Text("Budget Limit (Rs.)") }
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = spent,
+                    onValueChange = { spent = it },
+                    label = { Text("Amount Spent (Rs.)") }
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    val limitValue = limit.toDoubleOrNull() ?: 0.0
+                    val spentValue = spent.toDoubleOrNull() ?: 0.0
+                    if (name.isNotBlank() && limitValue > 0) {
+                        onSave(BudgetCategory(name, limitValue, spentValue))
+                    }
+                }
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

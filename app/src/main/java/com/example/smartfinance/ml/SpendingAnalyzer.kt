@@ -33,7 +33,7 @@ class SpendingAnalyzer {
             insights.add(
                 SpendingInsight(
                     category = category,
-                    message = "You've spent $${String.format("%.2f", total)} on $category in the last $months months.",
+                    message = "You've spent Rs.${String.format("%.2f", total)} on $category in the last $months months.",
                     insightType = InsightType.SPENDING_SUMMARY
                 )
             )
@@ -54,7 +54,7 @@ class SpendingAnalyzer {
             insights.add(
                 SpendingInsight(
                     category = "Entertainment",
-                    message = "You could save approximately $45 per month by reducing entertainment expenses.",
+                    message = "You could save approximately Rs. 45 per month by reducing entertainment expenses.",
                     insightType = InsightType.SAVING_OPPORTUNITY
                 )
             )
