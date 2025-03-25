@@ -22,7 +22,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun TransactionItem(transaction: Transaction) {
+fun TransactionItem(transaction: Transaction, modifier: Modifier) {
     Card(
         modifier = Modifier
             .fillMaxWidth()

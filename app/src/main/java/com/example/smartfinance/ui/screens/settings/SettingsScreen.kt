@@ -1,5 +1,7 @@
 package com.example.smartfinance.ui.screens.settings
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -15,119 +17,155 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.smartfinance.R
 import com.example.smartfinance.ui.components.BottomNavBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(navController: NavController) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Settings") }
-            )
-        },
-        bottomBar = { BottomNavBar(navController = navController) }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-        ) {
-            // Profile Section
-            SettingsSection(
-                title = "Profile",
-                icon = Icons.Default.Person,
-                items = listOf(
-                    SettingsItem("Personal Information", { /* Open personal info */ }),
-                    SettingsItem("Account Settings", { /* Open account settings */ })
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Background Image - replace 'settings_background' with your actual image resource name
+        Image(
+            painter = painterResource(id = R.drawable.blue),
+            contentDescription = "Background",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            alpha = 0.6f // Adjust transparency of the background
+        )
+
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Settings", color = Color.White) },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        titleContentColor = Color.White
+                    )
                 )
-            )
-
-            // Notifications Section
-            var notificationsEnabled by remember { mutableStateOf(true) }
-
-            SettingsSection(
-                title = "Notifications",
-                icon = Icons.Default.Notifications,
-                items = listOf(
-                    SettingsItem(
-                        "Enable Notifications",
-                        onClick = { },
-                        trailing = {
-                            Switch(
-                                checked = notificationsEnabled,
-                                onCheckedChange = { notificationsEnabled = it }
-                            )
-                        }
-                    ),
-                    SettingsItem("Notification Preferences", { /* Open notification preferences */ })
+            },
+            bottomBar = {
+                BottomNavBar(
+                    navController = navController,
+                    modifier = Modifier.background(Color.Transparent)
                 )
-            )
-
-            // Appearance Section
-            var darkModeEnabled by remember { mutableStateOf(false) }
-
-            SettingsSection(
-                title = "Appearance",
-                icon = Icons.Default.Palette,
-                items = listOf(
-                    SettingsItem(
-                        "Dark Mode",
-                        onClick = { },
-                        trailing = {
-                            Switch(
-                                checked = darkModeEnabled,
-                                onCheckedChange = { darkModeEnabled = it }
-                            )
-                        }
-                    ),
-                    SettingsItem("Theme", { /* Open theme settings */ })
-                )
-            )
-
-            // Security Section
-            SettingsSection(
-                title = "Security",
-                icon = Icons.Default.Security,
-                items = listOf(
-                    SettingsItem("Change Password", { /* Open change password */ }),
-                    SettingsItem("Biometric Authentication", { /* Open biometric settings */ }),
-                    SettingsItem("Privacy Settings", { /* Open privacy settings */ })
-                )
-            )
-
-            // Language Section
-            SettingsSection(
-                title = "Language",
-                icon = Icons.Default.Language,
-                items = listOf(
-                    SettingsItem("App Language", { /* Open language settings */ })
-                )
-            )
-
-            // About Section
-            SettingsSection(
-                title = "About",
-                icon = Icons.Default.Info,
-                items = listOf(
-                    SettingsItem("App Version", { /* Show app version */ }),
-                    SettingsItem("Terms of Service", { /* Open terms of service */ }),
-                    SettingsItem("Privacy Policy", { /* Open privacy policy */ })
-                )
-            )
-
-            // Logout Button
-            Button(
-                onClick = { /* Logout */ },
+            },
+            containerColor = Color.Transparent
+        ) { paddingValues ->
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(paddingValues)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
             ) {
-                Text("Logout")
+                // Profile Section
+                SettingsSection(
+                    title = "Profile",
+                    icon = Icons.Default.Person,
+                    items = listOf(
+                        SettingsItem("Personal Information", { /* Open personal info */ }),
+                        SettingsItem("Account Settings", { /* Open account settings */ })
+                    )
+                )
+
+                // Notifications Section
+                var notificationsEnabled by remember { mutableStateOf(true) }
+
+                SettingsSection(
+                    title = "Notifications",
+                    icon = Icons.Default.Notifications,
+                    items = listOf(
+                        SettingsItem(
+                            "Enable Notifications",
+                            onClick = { },
+                            trailing = {
+                                Switch(
+                                    checked = notificationsEnabled,
+                                    onCheckedChange = { notificationsEnabled = it },
+                                    colors = SwitchDefaults.colors(
+                                        checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                        checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
+                                    )
+                                )
+                            }
+                        ),
+                        SettingsItem("Notification Preferences", { /* Open notification preferences */ })
+                    )
+                )
+
+                // Appearance Section
+                var darkModeEnabled by remember { mutableStateOf(false) }
+
+                SettingsSection(
+                    title = "Appearance",
+                    icon = Icons.Default.Palette,
+                    items = listOf(
+                        SettingsItem(
+                            "Dark Mode",
+                            onClick = { },
+                            trailing = {
+                                Switch(
+                                    checked = darkModeEnabled,
+                                    onCheckedChange = { darkModeEnabled = it },
+                                    colors = SwitchDefaults.colors(
+                                        checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                        checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
+                                    )
+                                )
+                            }
+                        ),
+                        SettingsItem("Theme", { /* Open theme settings */ })
+                    )
+                )
+
+                // Security Section
+                SettingsSection(
+                    title = "Security",
+                    icon = Icons.Default.Security,
+                    items = listOf(
+                        SettingsItem("Change Password", { /* Open change password */ }),
+                        SettingsItem("Biometric Authentication", { /* Open biometric settings */ }),
+                        SettingsItem("Privacy Settings", { /* Open privacy settings */ })
+                    )
+                )
+
+                // Language Section
+                SettingsSection(
+                    title = "Language",
+                    icon = Icons.Default.Language,
+                    items = listOf(
+                        SettingsItem("App Language", { /* Open language settings */ })
+                    )
+                )
+
+                // About Section
+                SettingsSection(
+                    title = "About",
+                    icon = Icons.Default.Info,
+                    items = listOf(
+                        SettingsItem("App Version", { /* Show app version */ }),
+                        SettingsItem("Terms of Service", { /* Open terms of service */ }),
+                        SettingsItem("Privacy Policy", { /* Open privacy policy */ })
+                    )
+                )
+
+                // Logout Button
+                Button(
+                    onClick = { /* Logout */ },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                    )
+                ) {
+                    Text("Logout", color = Color.White)
+                }
             }
         }
     }
@@ -145,45 +183,62 @@ fun SettingsSection(
     icon: ImageVector,
     items: List<SettingsItem>
 ) {
-    Column(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
+        )
     ) {
-        // Section Header
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(vertical = 8.dp)
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
-            )
+            // Section Header
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
 
-            Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(16.dp))
 
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
 
-        // Section Items
-        items.forEach { item ->
-            ListItem(
-                headlineContent = { Text(item.title) },
-                trailingContent = item.trailing,
-                modifier = Modifier.clickable { item.onClick() }
-            )
+            // Section Items
+            items.forEach { item ->
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            item.title,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
+                        )
+                    },
+                    trailingContent = item.trailing,
+                    modifier = Modifier.clickable { item.onClick() }
+                )
 
-            Divider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                thickness = 0.5.dp
-            )
+                if (item != items.last()) {
+                    Divider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        thickness = 0.5.dp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+                    )
+                }
+            }
         }
     }
 }
